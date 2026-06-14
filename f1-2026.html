@@ -79,7 +79,7 @@
 const TEAM_COLORS = {"Mercedes":"#00D2BE","Ferrari":"#DC0000","McLaren":"#FF8000","Red Bull":"#3671C6","Alpine":"#FF87BC","Aston Martin":"#358C75","Williams":"#64C4FF","Racing Bulls":"#6692FF","Haas":"#B6BABD","Audi":"#B5B5B7","Cadillac":"#C8102E"};
 const TEAM_FLAGS = {"Mercedes":"🇩🇪","Ferrari":"🇮🇹","McLaren":"🇬🇧","Red Bull":"🇦🇹","Alpine":"🇫🇷","Aston Martin":"🇬🇧","Williams":"🇬🇧","Racing Bulls":"🇮🇹","Haas":"🇺🇸","Audi":"🇩🇪","Cadillac":"🇺🇸"};
 const MEDALS = ["🥇","🥈","🥉"];
-const RACES = [
+let RACES = [
   {r:1,name:"Australia",date:"8 Mar",done:true},{r:2,name:"China",date:"15 Mar",done:true},
   {r:3,name:"Japan",date:"29 Mar",done:true},{r:4,name:"Miami",date:"3 May",done:true},
   {r:5,name:"Canada",date:"24 May",done:true},{r:6,name:"Monaco",date:"7 Jun",done:true},
@@ -179,6 +179,16 @@ function render(){
       </div>
     </div>`).join('');
 }
+function shortRaceName(n){
+  const m={"Australian":"Australia","Chinese":"China","Japanese":"Japan","Miami":"Miami",
+    "Canadian":"Canada","Monaco":"Monaco","Spanish":"Barcelona","Austrian":"Austria",
+    "British":"Britain","Belgian":"Belgium","Hungarian":"Hungary","Dutch":"Netherlands",
+    "Italian":"Italy","Azerbaijan":"Azerbaijan","Singapore":"Singapore",
+    "United States":"USA","Mexico City":"Mexico","São Paulo":"Brazil","Las Vegas":"Las Vegas",
+    "Qatar":"Qatar","Abu Dhabi":"Abu Dhabi","Saudi Arabian":"Saudi Arabia","Bahrain":"Bahrain"};
+  const k=n.replace(" Grand Prix","").trim();
+  return m[k]||k;
+}
 async function autoUpdate(){
   const btn=document.getElementById('update-btn');
   const status=document.getElementById('status-msg');
@@ -188,14 +198,15 @@ async function autoUpdate(){
     "alpine":"Alpine","aston_martin":"Aston Martin","williams":"Williams","rb":"Racing Bulls",
     "racing_bulls":"Racing Bulls","haas":"Haas","audi":"Audi","cadillac":"Cadillac","andretti":"Cadillac"};
   try{
-    const [dr,cr]=await Promise.all([
+    const [dr,cr,sr]=await Promise.all([
       fetch("https://api.jolpi.ca/ergast/f1/2026/driverStandings.json"),
-      fetch("https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json")
+      fetch("https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json"),
+      fetch("https://api.jolpi.ca/ergast/f1/2026.json")
     ]);
-    if(!dr.ok||!cr.ok)throw new Error("API error");
-    const [dd,cd]=await Promise.all([dr.json(),cr.json()]);
+    if(!dr.ok||!cr.ok||!sr.ok)throw new Error("API error");
+    const [dd,cd,sd]=await Promise.all([dr.json(),cr.json(),sr.json()]);
     const dList=dd.MRData.StandingsTable.StandingsLists[0];
-    const round=dList.round;
+    const completedRound=Number(dList.round);
     drivers=sorted(dList.DriverStandings.map(d=>({
       name:d.Driver.givenName+" "+d.Driver.familyName,
       team:CMAP[d.Constructors[0].constructorId]||d.Constructors[0].name,
@@ -206,10 +217,19 @@ async function autoUpdate(){
       team:CMAP[c.Constructor.constructorId]||c.Constructor.name,
       pts:Number(c.points)||0
     })));
-    const raceName=RACES.find(r=>r.r==Number(round))?.name||"Round "+round;
-    lastUpdated="After Round "+round+" — "+raceName;
+    const allRaces=sd.MRData.RaceTable.Races;
+    RACES=allRaces.map(r=>{
+      const rNum=Number(r.round);
+      const done=rNum<=completedRound;
+      const current=!done&&rNum===completedRound+1;
+      const d=new Date(r.date);
+      const dateStr=d.getDate()+" "+d.toLocaleString('en-GB',{month:'short'});
+      return{r:rNum,name:shortRaceName(r.raceName),date:dateStr,done,current};
+    });
+    const raceName=RACES.find(r=>r.r===completedRound)?.name||"Round "+completedRound;
+    lastUpdated="After Round "+completedRound+" — "+raceName;
     save();render();
-    status.textContent='✓ Standings updated!';status.className='status-msg ok';
+    status.textContent='✓ Standings & calendar updated!';status.className='status-msg ok';
   }catch(e){
     status.textContent='Could not update — check your connection and try again.';status.className='status-msg err';
   }

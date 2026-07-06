@@ -1,0 +1,162 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700;800&display=swap');
+.f1-wrap{font-family:'DM Sans',sans-serif;max-width:460px;margin:0 auto;background:#08080f;border-radius:12px;overflow:hidden;color:#e8e8f0;}
+.f1-head{padding:20px 18px 16px;background:#0d0d16;border-bottom:1px solid #131320;}
+.f1-eye{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:4px;color:#e10600;text-transform:uppercase;margin-bottom:6px;}
+.f1-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px;line-height:1;color:#f0f0f8;}
+.f1-sub{font-size:11px;color:#2a2a45;margin-top:6px;letter-spacing:0.5px;}
+.f1-tabs{display:flex;background:#0d0d16;border-bottom:1px solid #131320;}
+.f1-tab{flex:1;padding:12px 0;background:none;border:none;border-bottom:2px solid transparent;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#3a3a55;cursor:pointer;font-weight:400;}
+.f1-tab.on{color:#e10600;border-bottom-color:#e10600;font-weight:700;}
+.f1-panel{display:none;padding:10px 12px 4px;}
+.f1-panel.on{display:block;}
+.f1-card{background:#0b0b14;border:1px solid #131320;border-radius:10px;margin-bottom:6px;padding:10px 14px;position:relative;overflow:hidden;}
+.f1-card.hi{background:#0f0f1c;border-color:#1e1e35;}
+.tbar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px;}
+.crow{display:flex;align-items:center;gap:10px;padding-left:8px;}
+.cpos{font-family:'Barlow Condensed',sans-serif;width:26px;text-align:center;font-size:13px;font-weight:800;color:#2a2a3f;flex-shrink:0;}
+.cpos.p1{font-size:17px;color:#ffd700}.cpos.p2{font-size:17px;color:#c0c0c0}.cpos.p3{font-size:17px;color:#cd7f32}
+.cname{font-size:13px;font-weight:600;color:#e8e8f0;}
+.cteam{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:2px;font-weight:600;}
+.cpw{text-align:right;}
+.cpn{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:800;color:#9090b0;line-height:1;}
+.cpn.ld{color:#fff}
+.cpl{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:#2a2a3f;letter-spacing:2px;}
+.bw{height:2px;margin-top:8px;margin-left:6px;background:#0f0f1c;border-radius:1px;overflow:hidden;}
+.bf{height:100%;border-radius:1px;}
+.cc{display:flex;align-items:center;gap:12px;padding:9px 14px;background:#0b0b14;border:1px solid #131320;border-radius:10px;margin-bottom:6px;}
+.cc.dn{background:#09090f}.cc.nx{background:#0d1a0d;border-color:#1a3a1a;}
+.cdot{width:25px;height:25px;border-radius:50%;background:#0f0f1c;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:#3a3a55;flex-shrink:0;}
+.cdot.dn{color:#2a2a3f;font-size:12px}.cdot.nx{background:#00aa00;color:#fff;}
+.cna{font-size:13px;font-weight:500;color:#9090b0;}
+.cna.dn{color:#2a2a3f}.cna.nx{color:#44dd44;font-weight:700;}
+.cbdg{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:2px;color:#44dd44;background:#0a200a;padding:2px 5px;border-radius:3px;margin-left:7px;}
+.cmeta{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#1e1e2f;letter-spacing:1px;margin-top:2px;}
+</style>
+<div class="f1-wrap">
+<div class="f1-head">
+  <div class="f1-eye">Formula 1 · 2026 season</div>
+  <div class="f1-title">Championship<br>standings</div>
+  <div class="f1-sub" id="f1sub">AFTER ROUND 9 — BRITAIN</div>
+</div>
+<div class="f1-tabs">
+  <button class="f1-tab on" onclick="f1tab('d',this)">Drivers</button>
+  <button class="f1-tab" onclick="f1tab('c',this)">Constructors</button>
+  <button class="f1-tab" onclick="f1tab('k',this)">Calendar</button>
+</div>
+<div id="f1d" class="f1-panel on"></div>
+<div id="f1c" class="f1-panel"></div>
+<div id="f1k" class="f1-panel"></div>
+</div>
+<script>
+const TC={"Mercedes":"#00D2BE","Ferrari":"#DC0000","McLaren":"#FF8000","Red Bull":"#3671C6","Alpine":"#FF87BC","Aston Martin":"#358C75","Williams":"#64C4FF","Racing Bulls":"#6692FF","Haas":"#B6BABD","Audi":"#B5B5B7","Cadillac":"#C8102E"};
+const TF={"Mercedes":"🇩🇪","Ferrari":"🇮🇹","McLaren":"🇬🇧","Red Bull":"🇦🇹","Alpine":"🇫🇷","Aston Martin":"🇬🇧","Williams":"🇬🇧","Racing Bulls":"🇮🇹","Haas":"🇺🇸","Audi":"🇩🇪","Cadillac":"🇺🇸"};
+const M=["🥇","🥈","🥉"];
+const RACES=[
+  {r:1,name:"Australia",date:"8 Mar",rd:"2026-03-08"},
+  {r:2,name:"China",date:"15 Mar",rd:"2026-03-15"},
+  {r:3,name:"Japan",date:"29 Mar",rd:"2026-03-29"},
+  {r:4,name:"Miami",date:"3 May",rd:"2026-05-03"},
+  {r:5,name:"Canada",date:"24 May",rd:"2026-05-24"},
+  {r:6,name:"Monaco",date:"7 Jun",rd:"2026-06-07"},
+  {r:7,name:"Barcelona",date:"14 Jun",rd:"2026-06-14"},
+  {r:8,name:"Austria",date:"28 Jun",rd:"2026-06-28"},
+  {r:9,name:"Britain",date:"5 Jul",rd:"2026-07-05"},
+  {r:10,name:"Belgium",date:"19 Jul",rd:"2026-07-19"},
+  {r:11,name:"Hungary",date:"26 Jul",rd:"2026-07-26"},
+  {r:12,name:"Netherlands",date:"23 Aug",rd:"2026-08-23"},
+  {r:13,name:"Italy",date:"6 Sep",rd:"2026-09-06"},
+  {r:14,name:"Spain / Madrid",date:"13 Sep",rd:"2026-09-13"},
+  {r:15,name:"Azerbaijan",date:"26 Sep",rd:"2026-09-26"},
+  {r:16,name:"Singapore",date:"11 Oct",rd:"2026-10-11"},
+  {r:17,name:"United States",date:"25 Oct",rd:"2026-10-25"},
+  {r:18,name:"Mexico City",date:"1 Nov",rd:"2026-11-01"},
+  {r:19,name:"Brazil",date:"8 Nov",rd:"2026-11-08"},
+  {r:20,name:"Las Vegas",date:"21 Nov",rd:"2026-11-21"},
+  {r:21,name:"Qatar",date:"29 Nov",rd:"2026-11-29"},
+  {r:22,name:"Abu Dhabi",date:"6 Dec",rd:"2026-12-06"},
+];
+const DD=[
+  {n:"Kimi Antonelli",t:"Mercedes",p:179},{n:"George Russell",t:"Mercedes",p:154},
+  {n:"Lewis Hamilton",t:"Ferrari",p:147},{n:"Charles Leclerc",t:"Ferrari",p:108},
+  {n:"Lando Norris",t:"McLaren",p:97},{n:"Oscar Piastri",t:"McLaren",p:82},
+  {n:"Max Verstappen",t:"Red Bull",p:76},{n:"Isack Hadjar",t:"Red Bull",p:52},
+  {n:"Pierre Gasly",t:"Alpine",p:42},{n:"Liam Lawson",t:"Racing Bulls",p:39},
+  {n:"Arvid Lindblad",t:"Racing Bulls",p:20},{n:"Oliver Bearman",t:"Haas",p:18},
+  {n:"Franco Colapinto",t:"Alpine",p:18},{n:"Gabriel Bortoleto",t:"Audi",p:6},
+  {n:"Carlos Sainz",t:"Williams",p:6},{n:"Alex Albon",t:"Williams",p:5},
+  {n:"Esteban Ocon",t:"Haas",p:3},{n:"Fernando Alonso",t:"Aston Martin",p:1},
+  {n:"Yuki Tsunoda",t:"Racing Bulls",p:0},{n:"Jack Doohan",t:"Alpine",p:0},
+  {n:"Nico Hulkenberg",t:"Audi",p:0},{n:"Lance Stroll",t:"Aston Martin",p:0},
+  {n:"Sergio Perez",t:"Cadillac",p:0},
+];
+const DC=[
+  {t:"Mercedes",p:333},{t:"Ferrari",p:255},{t:"McLaren",p:179},{t:"Red Bull",p:128},
+  {t:"Alpine",p:60},{t:"Racing Bulls",p:59},{t:"Haas",p:21},{t:"Williams",p:11},
+  {t:"Audi",p:6},{t:"Aston Martin",p:1},{t:"Cadillac",p:0},
+];
+function calState(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  let nf=false;
+  return RACES.map(r=>{
+    const rd=new Date(r.rd); rd.setHours(0,0,0,0);
+    const da=new Date(rd); da.setDate(rd.getDate()+1);
+    const done=today>da;
+    const cur=!done&&!nf; if(cur)nf=true;
+    return{...r,done,cur:cur&&!done};
+  });
+}
+function f1tab(id,el){
+  document.querySelectorAll('.f1-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.f1-panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('f1'+id).classList.add('on');
+}
+function render(){
+  const maxD=DD[0].p||1;
+  document.getElementById('f1d').innerHTML=DD.map((d,i)=>`
+    <div class="f1-card${i<3?' hi':''}">
+      <div class="tbar" style="background:${TC[d.t]||'#333'}"></div>
+      <div class="crow">
+        <div class="cpos${i===0?' p1':i===1?' p2':i===2?' p3':''}">${i<3?M[i]:i+1}</div>
+        <div style="flex:1">
+          <div class="cname">${d.n}</div>
+          <div class="cteam" style="color:${TC[d.t]||'#555'}">${TF[d.t]||''} ${d.t}</div>
+        </div>
+        <div class="cpw">
+          <div class="cpn${i===0?' ld':''}">${d.p}</div>
+          <div class="cpl">PTS</div>
+        </div>
+      </div>
+      <div class="bw"><div class="bf" style="width:${(d.p/maxD*100).toFixed(1)}%;background:${TC[d.t]||'#333'}"></div></div>
+    </div>`).join('');
+  const maxC=DC[0].p||1;
+  document.getElementById('f1c').innerHTML=DC.map((c,i)=>`
+    <div class="f1-card${i<3?' hi':''}">
+      <div class="tbar" style="background:${TC[c.t]||'#333'}"></div>
+      <div class="crow">
+        <div class="cpos${i===0?' p1':i===1?' p2':i===2?' p3':''}">${i<3?M[i]:i+1}</div>
+        <div style="flex:1">
+          <div class="cname">${c.t}</div>
+          <div class="cteam" style="color:#2a2a3f">${TF[c.t]||''} Constructor</div>
+        </div>
+        <div class="cpw">
+          <div class="cpn${i===0?' ld':''}">${c.p}</div>
+          <div class="cpl">PTS</div>
+        </div>
+      </div>
+      <div class="bw"><div class="bf" style="width:${(c.p/maxC*100).toFixed(1)}%;background:${TC[c.t]||'#333'}"></div></div>
+    </div>`).join('');
+  const cs=calState();
+  document.getElementById('f1k').innerHTML=cs.map(r=>`
+    <div class="cc${r.done?' dn':r.cur?' nx':''}">
+      <div class="cdot${r.done?' dn':r.cur?' nx':''}">${r.done?'✓':r.r}</div>
+      <div style="flex:1">
+        <div class="cna${r.done?' dn':r.cur?' nx':''}">${r.name}${r.cur?'<span class="cbdg">NEXT</span>':''}</div>
+        <div class="cmeta">Round ${r.r} · ${r.date}</div>
+      </div>
+    </div>`).join('');
+}
+render();
+</script>

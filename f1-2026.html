@@ -63,7 +63,7 @@
 <div class="header">
   <div class="eyebrow">Formula 1 · 2026 Season</div>
   <div class="title">Championship<br>Standings</div>
-  <div class="subtitle" id="last-updated">AFTER ROUND 6 — MONACO</div>
+  <div class="subtitle" id="last-updated">AFTER ROUND 9 — BRITAIN</div>
 </div>
 <div class="tabs">
   <button class="tab active" onclick="setTab('drivers',this)">Drivers</button>
@@ -79,53 +79,101 @@
 const TEAM_COLORS = {"Mercedes":"#00D2BE","Ferrari":"#DC0000","McLaren":"#FF8000","Red Bull":"#3671C6","Alpine":"#FF87BC","Aston Martin":"#358C75","Williams":"#64C4FF","Racing Bulls":"#6692FF","Haas":"#B6BABD","Audi":"#B5B5B7","Cadillac":"#C8102E"};
 const TEAM_FLAGS = {"Mercedes":"🇩🇪","Ferrari":"🇮🇹","McLaren":"🇬🇧","Red Bull":"🇦🇹","Alpine":"🇫🇷","Aston Martin":"🇬🇧","Williams":"🇬🇧","Racing Bulls":"🇮🇹","Haas":"🇺🇸","Audi":"🇩🇪","Cadillac":"🇺🇸"};
 const MEDALS = ["🥇","🥈","🥉"];
-let RACES = [
-  {r:1,name:"Australia",date:"8 Mar",done:true},{r:2,name:"China",date:"15 Mar",done:true},
-  {r:3,name:"Japan",date:"29 Mar",done:true},{r:4,name:"Miami",date:"3 May",done:true},
-  {r:5,name:"Canada",date:"24 May",done:true},{r:6,name:"Monaco",date:"7 Jun",done:true},
-  {r:7,name:"Barcelona",date:"14 Jun",done:false,current:true},{r:8,name:"Austria",date:"28 Jun",done:false},
-  {r:9,name:"Britain",date:"5 Jul",done:false},{r:10,name:"Belgium",date:"19 Jul",done:false},
-  {r:11,name:"Hungary",date:"26 Jul",done:false},{r:12,name:"Netherlands",date:"23 Aug",done:false},
-  {r:13,name:"Italy",date:"6 Sep",done:false},{r:14,name:"Azerbaijan",date:"26 Sep",done:false},
-  {r:15,name:"Singapore",date:"11 Oct",done:false},{r:16,name:"USA",date:"19 Oct",done:false},
+
+// Full 22-race calendar with race day dates (used to auto-tick via today's date)
+const RACES = [
+  {r:1,  name:"Australia",   date:"8 Mar",   raceDate:"2026-03-08"},
+  {r:2,  name:"China",       date:"15 Mar",  raceDate:"2026-03-15"},
+  {r:3,  name:"Japan",       date:"29 Mar",  raceDate:"2026-03-29"},
+  {r:4,  name:"Miami",       date:"3 May",   raceDate:"2026-05-03"},
+  {r:5,  name:"Canada",      date:"24 May",  raceDate:"2026-05-24"},
+  {r:6,  name:"Monaco",      date:"7 Jun",   raceDate:"2026-06-07"},
+  {r:7,  name:"Barcelona",   date:"14 Jun",  raceDate:"2026-06-14"},
+  {r:8,  name:"Austria",     date:"28 Jun",  raceDate:"2026-06-28"},
+  {r:9,  name:"Britain",     date:"5 Jul",   raceDate:"2026-07-05"},
+  {r:10, name:"Belgium",     date:"19 Jul",  raceDate:"2026-07-19"},
+  {r:11, name:"Hungary",     date:"26 Jul",  raceDate:"2026-07-26"},
+  {r:12, name:"Netherlands", date:"23 Aug",  raceDate:"2026-08-23"},
+  {r:13, name:"Italy",       date:"6 Sep",   raceDate:"2026-09-06"},
+  {r:14, name:"Spain/Madrid",date:"13 Sep",  raceDate:"2026-09-13"},
+  {r:15, name:"Azerbaijan",  date:"26 Sep",  raceDate:"2026-09-26"},
+  {r:16, name:"Singapore",   date:"11 Oct",  raceDate:"2026-10-11"},
+  {r:17, name:"United States",date:"25 Oct", raceDate:"2026-10-25"},
+  {r:18, name:"Mexico City", date:"1 Nov",   raceDate:"2026-11-01"},
+  {r:19, name:"Brazil",      date:"8 Nov",   raceDate:"2026-11-08"},
+  {r:20, name:"Las Vegas",   date:"21 Nov",  raceDate:"2026-11-21"},
+  {r:21, name:"Qatar",       date:"29 Nov",  raceDate:"2026-11-29"},
+  {r:22, name:"Abu Dhabi",   date:"6 Dec",   raceDate:"2026-12-06"},
 ];
+
 const DEFAULT_DRIVERS = [
-  {name:"Kimi Antonelli",team:"Mercedes",pts:156},{name:"Lewis Hamilton",team:"Ferrari",pts:90},
-  {name:"George Russell",team:"Mercedes",pts:88},{name:"Charles Leclerc",team:"Ferrari",pts:75},
-  {name:"Oscar Piastri",team:"McLaren",pts:60},{name:"Lando Norris",team:"McLaren",pts:58},
-  {name:"Max Verstappen",team:"Red Bull",pts:44},{name:"Isack Hadjar",team:"Red Bull",pts:28},
-  {name:"Liam Lawson",team:"Racing Bulls",pts:22},{name:"Pierre Gasly",team:"Alpine",pts:14},
-  {name:"Alex Albon",team:"Williams",pts:14},{name:"Esteban Ocon",team:"Haas",pts:14},
-  {name:"Arvid Lindblad",team:"Racing Bulls",pts:14},{name:"Franco Colapinto",team:"Alpine",pts:14},
-  {name:"Fernando Alonso",team:"Aston Martin",pts:5},{name:"Gabriel Bortoleto",team:"Audi",pts:5},
-  {name:"Jack Doohan",team:"Alpine",pts:10},{name:"Yuki Tsunoda",team:"Racing Bulls",pts:9},
-  {name:"Oliver Bearman",team:"Haas",pts:0},{name:"Lance Stroll",team:"Aston Martin",pts:0},
-  {name:"Carlos Sainz",team:"Williams",pts:0},{name:"Nico Hulkenberg",team:"Audi",pts:0},
+  {name:"Kimi Antonelli",team:"Mercedes",pts:179},
+  {name:"George Russell",team:"Mercedes",pts:154},
+  {name:"Lewis Hamilton",team:"Ferrari",pts:147},
+  {name:"Charles Leclerc",team:"Ferrari",pts:108},
+  {name:"Lando Norris",team:"McLaren",pts:97},
+  {name:"Oscar Piastri",team:"McLaren",pts:82},
+  {name:"Max Verstappen",team:"Red Bull",pts:76},
+  {name:"Isack Hadjar",team:"Red Bull",pts:52},
+  {name:"Pierre Gasly",team:"Alpine",pts:42},
+  {name:"Liam Lawson",team:"Racing Bulls",pts:39},
+  {name:"Arvid Lindblad",team:"Racing Bulls",pts:20},
+  {name:"Oliver Bearman",team:"Haas",pts:18},
+  {name:"Franco Colapinto",team:"Alpine",pts:18},
+  {name:"Gabriel Bortoleto",team:"Audi",pts:6},
+  {name:"Carlos Sainz",team:"Williams",pts:6},
+  {name:"Alex Albon",team:"Williams",pts:5},
+  {name:"Esteban Ocon",team:"Haas",pts:3},
+  {name:"Fernando Alonso",team:"Aston Martin",pts:1},
+  {name:"Yuki Tsunoda",team:"Racing Bulls",pts:0},
+  {name:"Jack Doohan",team:"Alpine",pts:0},
+  {name:"Nico Hulkenberg",team:"Audi",pts:0},
+  {name:"Lance Stroll",team:"Aston Martin",pts:0},
   {name:"Sergio Perez",team:"Cadillac",pts:0},
 ];
 const DEFAULT_CONSTRUCTORS = [
-  {team:"Mercedes",pts:244},{team:"Ferrari",pts:165},{team:"McLaren",pts:118},
-  {team:"Red Bull",pts:72},{team:"Racing Bulls",pts:45},{team:"Alpine",pts:38},
-  {team:"Haas",pts:19},{team:"Williams",pts:14},{team:"Audi",pts:5},
-  {team:"Aston Martin",pts:5},{team:"Cadillac",pts:0},
+  {team:"Mercedes",pts:333},{team:"Ferrari",pts:255},{team:"McLaren",pts:179},
+  {team:"Red Bull",pts:128},{team:"Alpine",pts:60},{team:"Racing Bulls",pts:59},
+  {team:"Haas",pts:21},{team:"Williams",pts:11},{team:"Audi",pts:6},
+  {team:"Aston Martin",pts:1},{team:"Cadillac",pts:0},
 ];
+
 function sorted(arr){return [...arr].sort((a,b)=>b.pts-a.pts).map((x,i)=>({...x,pos:i+1}));}
-let drivers=[],constructors=[],lastUpdated="After Round 6 — Monaco";
+
+// Work out which races are done and which is next, purely from today's date
+// A race is "done" if its race date was more than 1 day ago
+function getCalendarState(){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  let nextFound = false;
+  return RACES.map(r => {
+    const rd = new Date(r.raceDate);
+    rd.setHours(0,0,0,0);
+    const dayAfter = new Date(rd); dayAfter.setDate(rd.getDate()+1);
+    const done = today > dayAfter;
+    const current = !done && !nextFound;
+    if(current) nextFound = true;
+    return {...r, done, current: current && !done};
+  });
+}
+
+let drivers=[],constructors=[],lastUpdated="After Round 9 — Britain";
+
 function load(){
   try{
-    const d=localStorage.getItem("f1_drivers_v3");
-    const c=localStorage.getItem("f1_constructors_v3");
-    const l=localStorage.getItem("f1_last_updated_v3");
+    const d=localStorage.getItem("f1_drivers_v5");
+    const c=localStorage.getItem("f1_constructors_v5");
+    const l=localStorage.getItem("f1_last_updated_v5");
     drivers=d?JSON.parse(d):sorted(DEFAULT_DRIVERS);
     constructors=c?JSON.parse(c):sorted(DEFAULT_CONSTRUCTORS);
-    lastUpdated=l||"After Round 6 — Monaco";
+    lastUpdated=l||"After Round 9 — Britain";
   }catch{drivers=sorted(DEFAULT_DRIVERS);constructors=sorted(DEFAULT_CONSTRUCTORS);}
 }
 function save(){
   try{
-    localStorage.setItem("f1_drivers_v3",JSON.stringify(drivers));
-    localStorage.setItem("f1_constructors_v3",JSON.stringify(constructors));
-    localStorage.setItem("f1_last_updated_v3",lastUpdated);
+    localStorage.setItem("f1_drivers_v5",JSON.stringify(drivers));
+    localStorage.setItem("f1_constructors_v5",JSON.stringify(constructors));
+    localStorage.setItem("f1_last_updated_v5",lastUpdated);
   }catch{}
 }
 function setTab(name,el){
@@ -170,7 +218,10 @@ function render(){
       </div>
       <div class="bar-wrap"><div class="bar-fill" style="width:${(c.pts/maxC*100).toFixed(1)}%;background:${TEAM_COLORS[c.team]||'#333'}"></div></div>
     </div>`).join('');
-  document.getElementById('panel-calendar').innerHTML=RACES.map(r=>`
+
+  // Calendar uses live date logic - no hardcoding needed
+  const calState = getCalendarState();
+  document.getElementById('panel-calendar').innerHTML=calState.map(r=>`
     <div class="cal-card${r.done?' done':r.current?' current':''}">
       <div class="round-dot${r.done?' done':r.current?' current':''}">${r.done?'✓':r.r}</div>
       <div style="flex:1">
@@ -179,57 +230,34 @@ function render(){
       </div>
     </div>`).join('');
 }
-function shortRaceName(n){
-  const m={"Australian":"Australia","Chinese":"China","Japanese":"Japan","Miami":"Miami",
-    "Canadian":"Canada","Monaco":"Monaco","Spanish":"Barcelona","Austrian":"Austria",
-    "British":"Britain","Belgian":"Belgium","Hungarian":"Hungary","Dutch":"Netherlands",
-    "Italian":"Italy","Azerbaijan":"Azerbaijan","Singapore":"Singapore",
-    "United States":"USA","Mexico City":"Mexico","São Paulo":"Brazil","Las Vegas":"Las Vegas",
-    "Qatar":"Qatar","Abu Dhabi":"Abu Dhabi","Saudi Arabian":"Saudi Arabia","Bahrain":"Bahrain"};
-  const k=n.replace(" Grand Prix","").trim();
-  return m[k]||k;
-}
 async function autoUpdate(){
   const btn=document.getElementById('update-btn');
   const status=document.getElementById('status-msg');
   btn.disabled=true;btn.textContent='⏳  Fetching latest standings...';
-  status.textContent='Connecting to F1 data...';status.className='status-msg';
-  const CMAP={"mercedes":"Mercedes","ferrari":"Ferrari","mclaren":"McLaren","red_bull":"Red Bull",
-    "alpine":"Alpine","aston_martin":"Aston Martin","williams":"Williams","rb":"Racing Bulls",
-    "racing_bulls":"Racing Bulls","haas":"Haas","audi":"Audi","cadillac":"Cadillac","andretti":"Cadillac"};
+  status.textContent='Searching the web for current F1 standings...';status.className='status-msg';
   try{
-    const [dr,cr,sr]=await Promise.all([
-      fetch("https://api.jolpi.ca/ergast/f1/2026/driverStandings.json"),
-      fetch("https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json"),
-      fetch("https://api.jolpi.ca/ergast/f1/2026.json")
-    ]);
-    if(!dr.ok||!cr.ok||!sr.ok)throw new Error("API error");
-    const [dd,cd,sd]=await Promise.all([dr.json(),cr.json(),sr.json()]);
-    const dList=dd.MRData.StandingsTable.StandingsLists[0];
-    const completedRound=Number(dList.round);
-    drivers=sorted(dList.DriverStandings.map(d=>({
-      name:d.Driver.givenName+" "+d.Driver.familyName,
-      team:CMAP[d.Constructors[0].constructorId]||d.Constructors[0].name,
-      pts:Number(d.points)||0
-    })));
-    const cStandings=cd.MRData.StandingsTable.StandingsLists[0].ConstructorStandings;
-    constructors=sorted(cStandings.map(c=>({
-      team:CMAP[c.Constructor.constructorId]||c.Constructor.name,
-      pts:Number(c.points)||0
-    })));
-    const allRaces=sd.MRData.RaceTable.Races;
-    RACES=allRaces.map(r=>{
-      const rNum=Number(r.round);
-      const done=rNum<=completedRound;
-      const current=!done&&rNum===completedRound+1;
-      const d=new Date(r.date);
-      const dateStr=d.getDate()+" "+d.toLocaleString('en-GB',{month:'short'});
-      return{r:rNum,name:shortRaceName(r.raceName),date:dateStr,done,current};
+    const prompt=`Search the web right now for the current 2026 F1 Formula 1 championship standings after the most recent completed race. Return ONLY a JSON object, no other text or markdown, in exactly this format:
+{"lastUpdated":"After Round X — RaceName","drivers":[{"name":"Full Name","team":"TeamName","pts":123}],"constructors":[{"team":"TeamName","pts":456}]}
+Team names must be exactly one of: Mercedes, Ferrari, McLaren, Red Bull, Alpine, Aston Martin, Williams, Racing Bulls, Haas, Audi, Cadillac.
+All drivers and all 11 teams must be included. Return only valid JSON, nothing else.`;
+    const response=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+        tools:[{type:"web_search_20250305",name:"web_search"}],
+        messages:[{role:"user",content:prompt}]})
     });
-    const raceName=RACES.find(r=>r.r===completedRound)?.name||"Round "+completedRound;
-    lastUpdated="After Round "+completedRound+" — "+raceName;
+    const data=await response.json();
+    const textBlocks=(data.content||[]).filter(b=>b.type==="text");
+    if(!textBlocks.length)throw new Error("No response");
+    const raw=textBlocks[textBlocks.length-1].text;
+    const jsonMatch=raw.replace(/```json|```/g,"").match(/\{[\s\S]*\}/);
+    if(!jsonMatch)throw new Error("No JSON");
+    const parsed=JSON.parse(jsonMatch[0]);
+    drivers=sorted(parsed.drivers.map(d=>({name:d.name,team:d.team,pts:Number(d.pts)||0})));
+    constructors=sorted(parsed.constructors.map(c=>({team:c.team,pts:Number(c.pts)||0})));
+    lastUpdated=parsed.lastUpdated||"Latest standings";
     save();render();
-    status.textContent='✓ Standings & calendar updated!';status.className='status-msg ok';
+    status.textContent='✓ Standings updated successfully!';status.className='status-msg ok';
   }catch(e){
     status.textContent='Could not update — check your connection and try again.';status.className='status-msg err';
   }

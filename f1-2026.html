@@ -234,30 +234,44 @@ async function autoUpdate(){
   const btn=document.getElementById('update-btn');
   const status=document.getElementById('status-msg');
   btn.disabled=true;btn.textContent='⏳  Fetching latest standings...';
-  status.textContent='Searching the web for current F1 standings...';status.className='status-msg';
+  status.textContent='Connecting to F1 data...';status.className='status-msg';
+  const CMAP={"mercedes":"Mercedes","ferrari":"Ferrari","mclaren":"McLaren","red_bull":"Red Bull",
+    "alpine":"Alpine","aston_martin":"Aston Martin","williams":"Williams","rb":"Racing Bulls",
+    "racing_bulls":"Racing Bulls","haas":"Haas","audi":"Audi","cadillac":"Cadillac","andretti":"Cadillac"};
+  const safeFetch=async(url)=>{try{const r=await fetch(url);return r.ok?r.json():null;}catch{return null;}};
   try{
-    const prompt=`Search the web right now for the current 2026 F1 Formula 1 championship standings after the most recent completed race. Return ONLY a JSON object, no other text or markdown, in exactly this format:
-{"lastUpdated":"After Round X — RaceName","drivers":[{"name":"Full Name","team":"TeamName","pts":123}],"constructors":[{"team":"TeamName","pts":456}]}
-Team names must be exactly one of: Mercedes, Ferrari, McLaren, Red Bull, Alpine, Aston Martin, Williams, Racing Bulls, Haas, Audi, Cadillac.
-All drivers and all 11 teams must be included. Return only valid JSON, nothing else.`;
-    const response=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
-        tools:[{type:"web_search_20250305",name:"web_search"}],
-        messages:[{role:"user",content:prompt}]})
-    });
-    const data=await response.json();
-    const textBlocks=(data.content||[]).filter(b=>b.type==="text");
-    if(!textBlocks.length)throw new Error("No response");
-    const raw=textBlocks[textBlocks.length-1].text;
-    const jsonMatch=raw.replace(/```json|```/g,"").match(/\{[\s\S]*\}/);
-    if(!jsonMatch)throw new Error("No JSON");
-    const parsed=JSON.parse(jsonMatch[0]);
-    drivers=sorted(parsed.drivers.map(d=>({name:d.name,team:d.team,pts:Number(d.pts)||0})));
-    constructors=sorted(parsed.constructors.map(c=>({team:c.team,pts:Number(c.pts)||0})));
-    lastUpdated=parsed.lastUpdated||"Latest standings";
+    const [dd,cd]=await Promise.all([
+      safeFetch("https://api.jolpi.ca/ergast/f1/2026/driverStandings.json"),
+      safeFetch("https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json")
+    ]);
+    let completedRound=0;
+    let updated=[];
+    const dList=dd?.MRData?.StandingsTable?.StandingsLists?.[0];
+    if(dList?.DriverStandings?.length){
+      completedRound=Number(dList.round);
+      drivers=sorted(dList.DriverStandings.map(d=>({
+        name:d.Driver.givenName+" "+d.Driver.familyName,
+        team:CMAP[d.Constructors[0].constructorId]||d.Constructors[0].name,
+        pts:Number(d.points)||0
+      })));
+      updated.push('Drivers');
+    }
+    const cList=cd?.MRData?.StandingsTable?.StandingsLists?.[0];
+    if(cList?.ConstructorStandings?.length){
+      if(!completedRound)completedRound=Number(cList.round);
+      constructors=sorted(cList.ConstructorStandings.map(c=>({
+        team:CMAP[c.Constructor.constructorId]||c.Constructor.name,
+        pts:Number(c.points)||0
+      })));
+      updated.push('Constructors');
+    }
+    if(!updated.length)throw new Error("No data returned");
+    if(completedRound){
+      const raceName=RACES.find(r=>r.r===completedRound)?.name||"Round "+completedRound;
+      lastUpdated="After Round "+completedRound+" — "+raceName;
+    }
     save();render();
-    status.textContent='✓ Standings updated successfully!';status.className='status-msg ok';
+    status.textContent='✓ Updated: '+updated.join(' & ');status.className='status-msg ok';
   }catch(e){
     status.textContent='Could not update — check your connection and try again.';status.className='status-msg err';
   }
